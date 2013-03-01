@@ -2,6 +2,7 @@ Youtube-Karaoke 0.1 Beta
 ===============
 
 To run:
+
 1. Run a webserver
 
 2. Execute Lyrics for Google Chrome on your page https://chrome.google.com/webstore/detail/lyrics-for-google-
