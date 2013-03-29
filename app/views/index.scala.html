@@ -10,9 +10,8 @@
 <ul class="videos">
   @ressources.map { ressource =>
   <li>
-    <h2>@ressource.title</h2>
-    <iframe width="640" height="360" src="@ressource.embededURL" frameborder="0" allowfullscreen></iframe>
+    <a href="@routes.Application.ressource(ressource.id)">@ressource.title</a>
   </li>
   }
 </ul>
-}
+} { }

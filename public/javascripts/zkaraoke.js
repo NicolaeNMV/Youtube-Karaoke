@@ -5,6 +5,7 @@ zkaraoke = {};
     var subtitleOffSet = -0.8;
 
     var videoElement;
+    var display = $("#track");
     //.getCurrentTime()
     /**
     {
@@ -13,8 +14,8 @@ zkaraoke = {};
         "end":0
     }
      */
-
     function bindGUI() {
+        $(".lyricbox").parent().html($(".lyricbox").html());
         $('#ytl-lyrics').contents().filter(function() {
             return this.nodeType == 3; // TEXT NODE
         }).each(function(index, line) {
@@ -58,18 +59,32 @@ zkaraoke = {};
             return "zk" + myPlayer.getVideoId()
         }
         nsp.save = function() {
-            localStorage[nsp.prefix()] = JSON.stringify(lyricsMap);
+            //localStorage[nsp.prefix()] = JSON.stringify(lyricsMap);
+            $.ajax({
+              type: "POST",
+              url: /ressources/ + myPlayer.getVideoId(),
+              data: JSON.stringify(lyricsMap),
+              success: function(){},
+              contentType : 'application/json'
+            });
         },
-        nsp.load = function() {
-            var sval = localStorage[nsp.prefix()];
-            if (sval) {
+        nsp.load = function(onSuccess) {
+            $.getJSON("/ressources/" + myPlayer.getVideoId() + "/syncs").done(function(json) {
+                nsp.loadJson(json);
+                onSuccess();
+            })
+        }
+        nsp.loadJson = function(json) {
+            if (json) {
                 lyricsMap = []
-                JSON.parse(sval).forEach(function(val) {
+                json.forEach(function(val) {
                     if(val) {
                         lyricsMap[val.index] = val;
                     }
                 } )
             }
+
+ 
         }
     })(persistent);
 
@@ -80,15 +95,8 @@ zkaraoke = {};
         return minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
     }
 
-    function getCurrentTime() {
-        if (videoElement.is("video")) {
-            return videoElement[0].currentTime;
-        } else
-            return videoElement[0].getCurrentTime();
-    }
-
     $('body').on('click','#ytl-lyrics .zkline',function(e) {
-        var seconds = getCurrentTime();
+        var seconds = myPlayer.currentTime();
         $(".zktime",this).text( formatTime( Math.floor( seconds ) ) );
         putLyric( $(this).data("index"), $(".zklyric",this).text(), seconds );
     })
@@ -144,10 +152,11 @@ zkaraoke = {};
     }
 
     function run() {
-        persistent.load();
-        loadLineTime();
-        starTimeUpdate();
+        persistent.load(function() {
+            loadLineTime();
+        });
         bindGUI();
+        starTimeUpdate();
     }
     //run();
     ns.onPlayerReady = function(event) {

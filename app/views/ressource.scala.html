@@ -2,9 +2,16 @@
 
 @main("zkaraoke") {
 
-<h1>@ressource.title</h1>
-<iframe width="640" height="360" src="@ressource.embededURL" frameborder="0" allowfullscreen></iframe>
-<div class="lyrics">
+<h2 class="video-title">@ressource.title</h2>
+<div id="player_container"> 
+    <iframe id="player" width="640" height="390" src="@Html(ressource.embededURL + "&enablejsapi=1&html5=1&fs=1")" frameborder="0" allowfullscreen></iframe>
+    <div id="track"></div>
+</div>
+
+<div id="ytl-lyrics">
   @Html(lyrics)
 </div>
+}{
+    <script src="http://www.youtube.com/iframe_api"></script>
+    <script src="@routes.Assets.at("javascripts/zkaraoke.js")" type="text/javascript"></script>
 }

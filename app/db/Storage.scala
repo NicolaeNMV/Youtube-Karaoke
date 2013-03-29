@@ -40,7 +40,7 @@ object Storage {
 
   def saveSync(id: String, sync: JsValue): Future[Unit] = {
     val byId = Json.obj("id" -> id)
-    val value = Json.obj("$set" -> Json.obj("sync" -> sync))
+    val value = Json.obj("$set" -> Json.obj("syncs" -> sync))
     ressources.update(byId, value).map (_ => Unit)
   }
 }

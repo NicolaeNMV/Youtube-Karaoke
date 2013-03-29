@@ -1,0 +1,37 @@
+body {
+    margin-left: 10% !important;
+}
+h2.video-title {
+    text-align: center;
+    margin-bottom: 50px;
+}
+#player_container {
+    width: 650px;
+    position: relative;
+    display: inline-block;
+}
+#ytl-lyrics {
+    height: 400px;
+    overflow-y: scroll;
+    width: 400px;
+    margin-left: 10px;
+    padding-top: 20px;
+    display: inline-block;
+    vertical-align: -35px;
+    padding-right: 10px;
+}
+.zktime { 
+    margin-left:5px; float: right; 
+}
+#ytl-outerwrapper { 
+    width:400px !important; background: white; 
+}
+.zkline { cursor: pointer; }
+#track {
+    font-size: 20px; 
+    position: absolute; 
+    bottom: 60px; 
+    left:150px; color:white; background-color: rgba(0,0,0,0.4);
+    font-size: 20px;
+}
+.track-full-screen { font-size: 30px; bottom: 40px; left: 450px }
