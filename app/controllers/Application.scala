@@ -2,7 +2,7 @@ package controllers
 
 import scala.concurrent.Future
 import scala.util.Try
-  import play.api._
+import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Play.current
@@ -48,8 +48,10 @@ object Application extends Controller {
             } else None
           }).flatMap { maybeLinks =>
             maybeLinks.map { title =>
-              Storage.newRessource(id, title, Ressource.Type.youtube) map { _ =>
-                redirectToIndex
+              Lyrics.about(title).flatMap { maybeLyricsLink =>
+                Storage.newRessource(id, title, maybeLyricsLink, Ressource.Type.youtube) map { _ =>
+                  redirectToIndex
+                }
               }
             }.getOrElse(Future.successful(redirectToIndex))
           }.recover {
