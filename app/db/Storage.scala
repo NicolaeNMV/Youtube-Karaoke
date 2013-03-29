@@ -33,8 +33,8 @@ object Storage {
     ressources.find[JsValue, JsValue](Json.obj()).toList
   }
 
-  def findRessource(url: String): Future[Option[JsValue]] = {
-    val byURL = Json.obj("url" -> url)
+  def findRessource(id: String): Future[Option[JsValue]] = {
+    val byURL = Json.obj("id" -> id)
     ressources.find[JsValue, JsValue](byURL).headOption
   }
 }

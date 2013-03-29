@@ -48,7 +48,7 @@ object Application extends Controller {
             } else None
           }).flatMap { maybeLinks =>
             maybeLinks.map { title =>
-              Lyrics.about(title).flatMap { maybeLyricsLink =>
+              Lyrics.url(title).flatMap { maybeLyricsLink =>
                 Storage.newRessource(id, title, maybeLyricsLink, Ressource.Type.youtube) map { _ =>
                   redirectToIndex
                 }
@@ -59,6 +59,22 @@ object Application extends Controller {
           }
         }.toOption.getOrElse(Future.successful(redirectToIndex))
       )
+    }
+  }
+
+  def ressource(id: String) = Action { implicit request =>
+    import RessourceJson._
+    Async {
+      (for {
+        ressource <- Storage.findRessource(id).map(_.map(json => json.as[Ressource]))
+        if(ressource.isDefined)
+        if(ressource.get.lyrics.isDefined)
+        lyrics <- Lyrics.byURL(ressource.get.lyrics.get)
+      } yield {
+        Ok(views.html.ressource(ressource.get, lyrics))
+      }).recover {
+        case e:Exception => BadRequest
+      }
     }
   }
 }

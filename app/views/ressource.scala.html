@@ -1,0 +1,10 @@
+@(ressource: Ressource, lyrics: String)
+
+@main("zkaraoke") {
+
+<h1>@ressource.title</h1>
+<iframe width="640" height="360" src="@ressource.embededURL" frameborder="0" allowfullscreen></iframe>
+<div class="lyrics">
+  @Html(lyrics)
+</div>
+}

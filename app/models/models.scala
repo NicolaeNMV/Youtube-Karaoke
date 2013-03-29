@@ -51,13 +51,28 @@ object RessourceJson {
 
 object Lyrics {
 
-  def about(title: String): Future[Option[String]] = {
+  def url(title: String): Future[Option[String]] = {
     WS.url("https://ajax.googleapis.com/ajax/services/search/web")
       .withQueryString("c" -> "")
       .withQueryString("v" -> "1.0")
       .withQueryString("q" -> s"""site:lyrics.wikia.com $title -"Page+Ranking+Information"""")
       .get().map(_.json).map { json =>
          (json \ "responseData" \ "results").as[List[JsValue]].headOption.flatMap(json => (json \ "unescapedUrl").asOpt[String])
+       }
+  }
+
+  def byURL(url: String): Future[String] = {
+    import org.jsoup.Jsoup
+
+    WS.url(url)
+      .get().map(_.body).map { page =>
+         val html = Jsoup.parse(page)
+         val lyrics = html.select(".lyricbox")
+         lyrics.select("a").remove()
+         lyrics.select(".rtMatcher").remove()
+         lyrics.select(".lyricsbreak").remove()
+         lyrics.select("#comments").remove()
+         lyrics.toString
        }
   }
 }
