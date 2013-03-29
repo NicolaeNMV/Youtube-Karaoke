@@ -2,6 +2,9 @@ var lyricsMap = [];
 console.log("ZKaraoké! 0.1 Loaded");
 (function($) {
     var subtitleOffSet = -0.8;
+
+    var videoElement = $("#movie_player") || $('video')
+    //.getCurrentTime()
     /**
     {
         "index": 0,
@@ -9,10 +12,15 @@ console.log("ZKaraoké! 0.1 Loaded");
         "end":0
     }
      */
-    $('body').append( $("<style>.zktime{ margin-left:5px; float: right; }</style>") );
-    $('body').append( $("<style>#ytl-outerwrapper{ width:400px !important; background: white; }</style>") );
-    $('body').append( $("<style>.zkline{ cursor: pointer; }</style>") );
-    var display = $('<div id="track" style="position:absolute; bottom:10px; left:200px;color:white; background-color: rgba(0,0,0,0.4)"></div>').appendTo( $("video").parent() )
+    $('body').append( $("<style>\
+        .zktime { margin-left:5px; float: right; \
+        #ytl-outerwrapper { width:400px !important; background: white; }\
+        .zkline { cursor: pointer; }\
+        #track { font-size: 15px; position:absolute; bottom:10px; left:150px; color:white; background-color: rgba(0,0,0,0.4) } \
+        .track-full-screen { font-size: 30px; bottom: 40px; left: 450px } \
+    }</style>") );
+    var display = $('<div id="track"></div>').appendTo( videoElement.parent() )
+
 
     $('#ytl-lyrics').contents().filter(function() {
         return this.nodeType == 3; // TEXT NODE
@@ -35,11 +43,7 @@ console.log("ZKaraoké! 0.1 Loaded");
         }
         persistent.save();
     }
-/**
- * 1 
- * 3
- * 6
- */
+
     function getLyric(second) {
         for (i = 0; i < lyricsMap.length; i++) {
             if (lyricsMap[i] && lyricsMap[i].start >= second) {
@@ -49,13 +53,20 @@ console.log("ZKaraoké! 0.1 Loaded");
         }
     }
 
+    function getVideoId() {
+        return /v=([\w-]{11})/.exec(window.location.search)[1]
+    }
+
     var persistent = {
+        prefix: function() {
+            //return "zk" + window.location.pathname + window.location.search;
+            return "zk" + getVideoId()
+        }
         save: function() {
-            localStorage["zk" + window.location.pathname] = JSON.stringify(lyricsMap);
+            localStorage[prefix()] = JSON.stringify(lyricsMap);
         },
         load: function() {
-            //console.log("zk" + window.location.pathname)
-            var sval = localStorage["zk" + window.location.pathname];
+            var sval = localStorage[prefix()];
             if (sval) {
                 lyricsMap = []
                 JSON.parse(sval).forEach(function(val) {
@@ -74,23 +85,35 @@ console.log("ZKaraoké! 0.1 Loaded");
         return minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
     }
 
+    function getCurrentTime() {
+        if (videoElement.is("video")) {
+            return videoElement[0].currentTime;
+        } else
+            return videoElement[0].getCurrentTime();
+    }
+
     $('body').on('click','#ytl-lyrics .zkline',function(e) {
-        var seconds = $("video")[0].currentTime;
+        var seconds = getCurrentTime();
         $(".zktime",this).text( formatTime( Math.floor( seconds ) ) );
         putLyric( $(this).data("index"), $(".zklyric",this).text(), seconds );
     })
 
     var current = {index: null};
-    $("video").bind("timeupdate",
-        function() {
+
+    function onTimeUpdate() {
             var newLyric = getLyric(this.currentTime - subtitleOffSet);
-            //console.log("newLyric ", newLyric);
+            console.log("newLyric ", newLyric);
             if (newLyric && current.index != newLyric.index) {
                 current.index = newLyric.index;
                 setCurrentLyric(newLyric.lyric);
             }
         }
-    )
+
+    if (videoElement.is("video")) {
+        $("video").bind("timeupdate", onTimeUpdate)
+    } else {
+        setInterval(onTimeUpdate, 200);
+    }
 
     function setCurrentLyric(text) {
         display.text(text);
@@ -100,16 +123,7 @@ console.log("ZKaraoké! 0.1 Loaded");
     $(document).bind('webkitfullscreenchange mozfullscreenchange fullscreenchange',
         function(e){
             isFullScreen = !isFullScreen;
-            console.log("Now: ",isFullScreen);
-            if (isFullScreen) {
-                display.css("font-size","30px");
-                display.css("bottom","40px");
-                display.css("left","450px");
-            } else {
-                display.css("font-size","15px");
-                display.css("bottom","10px");
-                display.css("left","200px");
-            }
+            display.toggleClass("track-full-screen",isFullScreen);
         }
     );
 
