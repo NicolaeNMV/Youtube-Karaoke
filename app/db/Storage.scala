@@ -37,4 +37,10 @@ object Storage {
     val byURL = Json.obj("id" -> id)
     ressources.find[JsValue, JsValue](byURL).headOption
   }
+
+  def saveSync(id: String, sync: JsValue): Future[Unit] = {
+    val byId = Json.obj("id" -> id)
+    val value = Json.obj("$set" -> Json.obj("sync" -> sync))
+    ressources.update(byId, value).map (_ => Unit)
+  }
 }

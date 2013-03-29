@@ -8,6 +8,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws._
+import db._
 import models._
 
 object Ressource {
@@ -25,8 +26,10 @@ object Ressource {
   }
 }
 
-case class Ressource(id: String, lyrics: Option[String], title: String, from: Ressource.Type.Value, created: Date) {
+case class Ressource(id: String, lyrics: Option[String], syncs: Option[JsValue], title: String, from: Ressource.Type.Value, created: Date) {
   lazy val embededURL: String = Ressource.asEmbededURL(id)
+
+  def saveSync(json: JsValue): Future[Unit] = Storage.saveSync(id, json)
 }
 
 object RessourceJson {
@@ -40,10 +43,11 @@ object RessourceJson {
   implicit val ressourceReader = (
     (__ \ 'id).read[String] and
     (__ \ 'lyrics).readNullable[String] and
+    (__ \ 'syncs).readNullable[JsValue] and
     (__ \ 'title).read[String] and
     (__ \ 'from).read[Ressource.Type.Value] and
     (__ \ 'created \ '$date).read[Date]
-  )((id, lyrics, title, from, created) => Ressource(id, lyrics, title, from, created))
+  )((id, lyrics, syncs, title, from, created) => Ressource(id, lyrics, syncs, title, from, created))
 
   implicit val ressourcesReader = seq(ressourceReader)
 }

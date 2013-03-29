@@ -77,4 +77,35 @@ object Application extends Controller {
       }
     }
   }
+
+  def saveSync(id: String) = Action(parse.json) { implicit request =>
+    import RessourceJson._
+    Async {
+      (for {
+        ressource <- Storage.findRessource(id).map(_.map(json => json.as[Ressource]))
+        if(ressource.isDefined)
+        done <- ressource.get.saveSync(request.body)
+      } yield {
+        Ok
+      }).recover {
+        case e: Exception => BadRequest
+      }
+    }
+  }
+
+  def syncs(id: String) = Action { implicit request =>
+    import RessourceJson._
+    Async {
+      Storage.findRessource(id).map(_.map(json => json.as[Ressource])).map { maybeRessource =>
+        (for {
+          ressource <- maybeRessource
+          syncs <- ressource.syncs
+        } yield {
+          Ok(syncs)
+        }).getOrElse(BadRequest)
+      }.recover {
+        case e: Exception => NotFound
+      }
+    }
+  }
 }

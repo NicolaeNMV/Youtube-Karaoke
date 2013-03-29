@@ -4,9 +4,10 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /ressources/:id             controllers.Application.ressource(id)
-
 POST    /ressources                 controllers.Application.newRessource()
+GET     /ressources/:id             controllers.Application.ressource(id)
+POST    /ressources/:id             controllers.Application.saveSync(id)
+GET     /ressources/:id/syncs       controllers.Application.syncs(id)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
