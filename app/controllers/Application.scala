@@ -1,32 +1,61 @@
 package controllers
 
 import scala.concurrent.Future
-import play.api._
+import scala.util.Try
+  import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.Play.current
 import play.api.libs.ws._
-import play.modules.reactivemongo._
-import play.modules.reactivemongo.PlayBsonImplicits._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.data._
+import play.api.data.Forms._
+import org.jsoup.Jsoup
+import models._
+import db._
 
 object Application extends Controller {
-  val db = ReactiveMongoPlugin.db
-  lazy val collection = db("videos")
 
   def index = Action { implicit req =>
-    Ok(views.html.index())
+    import RessourceJson._
+    Async {
+      Storage.findRessources().map(_.map(_.as[Ressource])).map { ressources =>
+        Ok(views.html.index(ressources))
+      }
+    }
   }
 
-  def addUrl(url: String) = Action {
+  def redirectToIndex = Redirect(routes.Application.index)
+
+  val ressourceForm = Form(
+    "url" -> nonEmptyText
+  )
+
+  def newRessource() = Action { implicit request =>
     Async {
-      val homePage: Future[play.api.libs.ws.Response] = WS.url("http://mysite.com").get()
-      val json = Json.obj(
-        "url" -> url,
-        "created" -> new java.util.Date().getTime()
-      )
-      collection.insert[JsValue]( json ).map( lastError =>
-        Ok("Mongo LastErorr:%s".format(lastError))
+      ressourceForm.bindFromRequest.fold(
+        errors => Future.successful(redirectToIndex),
+        url => Try {
+          val id = Ressource.idFromURL(url).get
+          (for {
+            response <- WS.url(url).get()
+            maybeRessource <- Storage.findRessource(id)
+          } yield {
+            if(!maybeRessource.isDefined) {
+              val html = Jsoup.parse(response.body)
+              val title = html.select("#eow-title").text()
+              Some(title)
+            } else None
+          }).flatMap { maybeLinks =>
+            maybeLinks.map { title =>
+              Storage.newRessource(id, title, Ressource.Type.youtube) map { _ =>
+                redirectToIndex
+              }
+            }.getOrElse(Future.successful(redirectToIndex))
+          }.recover {
+            case e:Exception => redirectToIndex
+          }
+        }.toOption.getOrElse(Future.successful(redirectToIndex))
       )
     }
   }

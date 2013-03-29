@@ -1,4 +1,18 @@
-@()
+@(ressources: List[Ressource])
 
 @main("zkaraoke") {
+
+<form action="/ressources" method="POST">
+  <input type="text" name="url" placeholder="Enter URL"/>
+  <button class="btn submit">Add</button>
+</form>
+
+<ul class="videos">
+  @ressources.map { ressource =>
+  <li>
+    <h2>@ressource.title</h2>
+    <iframe width="640" height="360" src="@ressource.embededURL" frameborder="0" allowfullscreen></iframe>
+  </li>
+  }
+</ul>
 }
