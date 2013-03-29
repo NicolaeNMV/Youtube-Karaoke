@@ -1,0 +1,17 @@
+logs
+project/project
+project/target
+target
+tmp
+*.DS_Store
+*~
+*#*
+.classpath
+.project
+.settings
+.cache
+.target
+*.sc
+.worksheet
+.idea
+.idea_modules
