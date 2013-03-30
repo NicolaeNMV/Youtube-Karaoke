@@ -1,4 +1,5 @@
 var lyricsMap = [];
+var console = console || {"logs":function(){}}
 console.log("ZKaraoké! 0.1 Loaded");
 zkaraoke = {};
 (function(ns, $) {
@@ -17,7 +18,7 @@ zkaraoke = {};
     function bindGUI() {
         $(".lyricbox").parent().html($(".lyricbox").html());
         $('#ytl-lyrics').contents().filter(function() {
-            return this.nodeType == 3; // TEXT NODE
+            return this.nodeType == 3 && this.textContent.trim().length > 0; // TEXT NODE
         }).each(function(index, line) {
             var newLine = $('<span class="zkline"><span class="zklyric"></span><span class="zktime"></span></span>');
             newLine.find(".zklyric").text( line.data );
