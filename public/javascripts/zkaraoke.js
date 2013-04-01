@@ -7,7 +7,6 @@ zkaraoke = {};
 
     var videoElement;
     var display = $("#track");
-    //.getCurrentTime()
     /**
     {
         "index": 0,
@@ -47,11 +46,6 @@ zkaraoke = {};
                 return lyricsMap[i-1];
             }
         }
-    }
-
-    function getVideoId() {
-        //return /v=([\w-]{11})/.exec(window.location.search)[1]
-        return "qb_hqexKkw8";
     }
 
     var persistent = {};
@@ -159,7 +153,6 @@ zkaraoke = {};
         bindGUI();
         starTimeUpdate();
     }
-    //run();
     ns.onPlayerReady = function(event) {
         videoElement = event.target;
         console.log("Player ready");
